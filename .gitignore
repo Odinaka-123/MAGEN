@@ -1,0 +1,12 @@
+node_modules/
+.env*
+*.log
+.DS_Store
+/build/
+/public/css/
+/public/js/
+/public/images/
+/vercel/
+*.tsbuildinfo
+.next/
+/out/
