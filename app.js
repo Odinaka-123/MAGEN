@@ -20,14 +20,15 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// Swagger setup
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/breaches', breachRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/users', userRoutes);
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+module.exports = app;

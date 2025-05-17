@@ -27,7 +27,7 @@ This guide will help you set up and run the MAGEN project, including both the ba
    - Add your MongoDB connection string and any other required environment variables.
 4. **Start the backend server:**
    ```sh
-   npm start
+   node server.js
    ```
    - The backend should now be running (default: http://localhost:3000 or as configured).
 
@@ -93,7 +93,8 @@ This guide will help you set up and run the MAGEN project, including both the ba
 
 MAGEN is a full-stack web application designed to provide security breach detection, alerting, and user privacy recommendations. The project is split into two main parts:
 
-- **Backend:** Node.js with Express, connected to MongoDB, providing RESTful APIs for authentication, breach management, alerts, and user management.
+- **Backend:** Node.js with Express, connected to MongoDB, provi
+ding RESTful APIs for authentication, breach management, alerts, and user management.
 - **Frontend:** Next.js (React) application, styled with Tailwind CSS, providing a modern dashboard and user interface for interacting with the backend services.
 
 ---

@@ -20,4 +20,6 @@ const getBreachesByUser = async (userId) => {
   return await Breach.find({ userId });
 };
 
-module.exports = { createBreach, getBreachesByUser };
+module.exports = Breach;
+module.exports.createBreach = createBreach;
+module.exports.getBreachesByUser = getBreachesByUser;

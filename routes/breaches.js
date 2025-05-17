@@ -4,10 +4,52 @@ const router = express.Router();
 const auth = require('../middlewares/auth');
 const { getBreaches, scanBreaches, getBreachStats } = require('../controllers/breachController');
 
+/**
+ * @swagger
+ * /api/breaches/stats:
+ *   get:
+ *     summary: Get breach statistics
+ *     tags: [Breaches]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Breach statistics
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/stats', auth, getBreachStats);
 
+/**
+ * @swagger
+ * /api/breaches/scan:
+ *   post:
+ *     summary: Scan for new breaches
+ *     tags: [Breaches]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Scan complete
+ *       401:
+ *         description: Unauthorized
+ */
 router.post('/scan', auth, scanBreaches);
 
+/**
+ * @swagger
+ * /api/breaches:
+ *   get:
+ *     summary: Get all breaches
+ *     tags: [Breaches]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of breaches
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/', auth, getBreaches);
 
 module.exports = router;
