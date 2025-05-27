@@ -279,4 +279,4 @@ magen-project/
 
 ---
 
-This documentation provides a comprehensive overview of the MAGEN project and what has been implemented so far. If you need even more detail on a specific part (e.g., API contracts, component props, or service logic), let me know!
+This documentation provides a comprehensive overview of the MAGEN project and what has been implemented so far.

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+import { getUserProfile } from "@/services/api"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -28,125 +29,90 @@ export function SettingsForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "John Doe",
-      email: "john.doe@example.com",
+      name: "",
+      email: "",
       emailAlerts: true,
       inAppAlerts: true,
       weeklyDigest: false,
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  useEffect(() => {
+    async function fetchUserData() {
+      try {
+        const userData = await getUserProfile()
+        form.reset({
+          name: userData.name,
+          email: userData.email,
+          emailAlerts: userData.emailAlerts || true,
+          inAppAlerts: userData.inAppAlerts || true,
+          weeklyDigest: userData.weeklyDigest || false,
+        })
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch user data.",
+          variant: "destructive",
+        })
+      }
+    }
+
+    fetchUserData()
+  }, [form, toast])
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       toast({
         title: "Settings updated",
         description: "Your account settings have been updated successfully.",
       })
-    }, 1000)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update settings.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Information</CardTitle>
-            <CardDescription>Update your personal information and how we can reach you</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="text-base font-medium mb-4">Notification Preferences</h3>
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="emailAlerts"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Email Alerts</FormLabel>
-                        <FormDescription>Receive email notifications for new breaches</FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="inAppAlerts"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">In-App Alerts</FormLabel>
-                        <FormDescription>Receive notifications within the application</FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="weeklyDigest"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Weekly Digest</FormLabel>
-                        <FormDescription>Receive a weekly summary of your security status</FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Changes"}
-            </Button>
-          </CardFooter>
-        </Card>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Full Name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter your email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+          {isLoading ? "Saving..." : "Save Settings"}
+        </Button>
       </form>
     </Form>
   )

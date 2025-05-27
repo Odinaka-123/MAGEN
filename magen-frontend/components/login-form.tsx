@@ -11,6 +11,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 
+// Add API_BASE_URL definition for login endpoint
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
+
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
@@ -29,21 +32,46 @@ export function LoginForm() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-
-      // For demo purposes, always succeed
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password,
+        }),
+      })
+      const data = await res.json()
+      console.log('LOGIN RESPONSE DATA:', data) 
+      if (!res.ok) {
+        setIsLoading(false)
+        toast({
+          title: "Login failed",
+          description: data.message || "Invalid credentials. Please try again.",
+          variant: "destructive",
+        })
+        return
+      }
+      // Optionally store JWT token in localStorage
+      if (data.token) {
+        localStorage.setItem("magen_token", data.token)
+      }
       toast({
         title: "Login successful",
         description: "Redirecting to dashboard...",
       })
-
       router.push("/dashboard")
-    }, 1000)
+    } catch (err) {
+      toast({
+        title: "Login failed",
+        description: "Network error. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

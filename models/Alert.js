@@ -1,25 +1,22 @@
 // models/Alert.js
-const mongoose = require('mongoose');
+const pool = require('../config/db');
 
-const alertSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  breachId: { type: mongoose.Schema.Types.ObjectId, ref: 'Breach' },
-  message: { type: String, required: true },
-  status: { type: String, default: 'Pending' }
-}, { timestamps: true });
+// Create a new alert
+async function createAlert(userId, breachId, message) {
+  const [result] = await pool.execute(
+    'INSERT INTO alerts (user_id, breach_id, message) VALUES (?, ?, ?)',
+    [userId, breachId, message]
+  );
+  return result.insertId;
+}
 
-const Alert = mongoose.model('Alert', alertSchema);
+// Get alerts by user
+async function getAlertsByUser(userId) {
+  const [rows] = await pool.execute('SELECT * FROM alerts WHERE user_id = ? ORDER BY created_at DESC', [userId]);
+  return rows;
+}
 
-const createAlert = async (userId, breachId, message) => {
-  const alert = new Alert({ userId, breachId, message });
-  await alert.save();
-  return alert._id;
+module.exports = {
+  createAlert,
+  getAlertsByUser,
 };
-
-const getAlertsByUser = async (userId) => {
-  return await Alert.find({ userId });
-};
-
-module.exports = Alert;
-module.exports.createAlert = createAlert;
-module.exports.getAlertsByUser = getAlertsByUser;

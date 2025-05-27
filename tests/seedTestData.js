@@ -1,7 +1,7 @@
-const Breach = require('../models/Breach');
-const Alert = require('../models/Alert');
+const pool = require('../config/db');
 
 module.exports = async () => {
-  await Breach.deleteMany({});
-  await Alert.deleteMany({});
+  await pool.execute('DELETE FROM breaches');
+  await pool.execute('DELETE FROM alerts');
+  await pool.execute('DELETE FROM users');
 };

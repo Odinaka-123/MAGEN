@@ -1,22 +1,21 @@
 // services/breachDetectionService.js
-const fetch = require('node-fetch');
-const { createBreach } = require('../models/Breach');
+const pool = require('../config/db');
 
+// Check for breaches by email in the local database
 const checkBreaches = async (userId, email) => {
   try {
-    const response = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${email}`, {
-      headers: {
-        'hibp-api-key': process.env.HIBP_API_KEY, // Add this to .env if using paid API
-        'user-agent': 'MAGEN-App'
-      }
-    });
-    if (!response.ok) return [];
+    const cleanEmail = email.trim().toLowerCase();
+    console.log('Checking breaches for email:', cleanEmail);
 
-    const breaches = await response.json();
-    for (const breach of breaches) {
-      await createBreach(userId, breach.Name, breach.BreachDate, breach.Description);
-    }
-    return breaches;
+    const query = 'SELECT * FROM breaches WHERE LOWER(email) = ?';
+    const params = [cleanEmail];
+
+    console.log('Executing query:', query);
+    console.log('With parameters:', params);
+
+    const [rows] = await pool.execute(query, params);
+    console.log('Breaches found:', rows);
+    return rows;
   } catch (error) {
     console.error('Error checking breaches:', error);
     return [];

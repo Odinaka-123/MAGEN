@@ -76,6 +76,16 @@ export async function getAlertsByUserId(userId: number) {
   return query(sql, [userId])
 }
 
+// Scan for breaches for a given email (stub for now)
+export async function scanBreachesForEmail(userId: number, email: string) {
+  console.log("[SCAN] Scanning for breaches:", { userId, email })
+  // Simulate scan: fetch breaches for this email from the database
+  // (Replace with real scan logic as needed)
+  const sql = "SELECT * FROM breaches WHERE email = ? AND user_id = ? ORDER BY detected_date DESC"
+  const results = await query(sql, [email, userId])
+  return results
+}
+
 // Database schema setup
 export async function setupDatabase() {
   // Create users table

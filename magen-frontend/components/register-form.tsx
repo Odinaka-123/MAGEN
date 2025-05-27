@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
+import { registerUser } from "@/services/api"
 
 const formSchema = z
   .object({
@@ -38,22 +39,28 @@ export function RegisterForm() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-
-      // For demo purposes, always succeed
+    try {
+      await registerUser({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      })
       toast({
         title: "Registration successful",
         description: "Welcome to MAGEN! Let's set up your account.",
       })
-
-      // Redirect to onboarding flow instead of login
       router.push("/onboarding/1")
-    }, 1000)
+    } catch (err: any) {
+      toast({
+        title: "Registration failed",
+        description: err.message || "An error occurred. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

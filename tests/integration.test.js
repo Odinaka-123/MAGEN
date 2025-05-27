@@ -1,20 +1,12 @@
 const request = require('supertest');
-const mongoose = require('mongoose');
 const app = require('../app');
-const User = require('../models/User');
-const Breach = require('../models/Breach');
-const Alert = require('../models/Alert');
+const pool = require('../config/db');
+const clearTestData = require('./seedTestData');
 let jwtToken;
 
 beforeAll(async () => {
   // Clean up users, breaches, and alerts before tests
-  await User.deleteMany({});
-  await Breach.deleteMany({});
-  await Alert.deleteMany({});
-});
-
-afterAll(async () => {
-  await mongoose.connection.close();
+  await clearTestData();
 });
 
 describe('Authentication', () => {
@@ -34,7 +26,7 @@ describe('Authentication', () => {
 
   it('should not register with missing fields', async () => {
     const res = await request(app).post('/api/auth/register').send({ email: 'missing@example.com' });
-    expect(res.statusCode).toBe(500); // Mongoose validation error
+    expect(res.statusCode).toBe(500);
   });
 
   it('should login successfully', async () => {
@@ -134,4 +126,9 @@ describe('Error Handling', () => {
   });
 });
 
+afterAll(async () => {
+  if (process.env.NODE_ENV === 'test') {
+    await pool.end();
+  }
+});
 // Edge cases and database tests can be expanded as needed
