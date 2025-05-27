@@ -279,4 +279,83 @@ magen-project/
 
 ---
 
-This documentation provides a comprehensive overview of the MAGEN project and what has been implemented so far.
+# 🧭 Architecture Flow
+
+## 1. 📥 Raw Data Intake
+
+### Sources
+- User Credentials  
+- Breach Reports (public & private feeds)
+
+---
+
+## 2. ⚙️ Backend Processing
+
+### Server
+- Node.js + Express
+
+### Responsibilities
+- Data cleaning  
+- Breach detection  
+- Alert generation logic
+
+---
+
+## 3. 🗄️ Database
+
+### Type
+- MongoDB
+
+### Stores
+- Users  
+- Breaches  
+- Alerts
+
+---
+
+## 4. 🛠️ Services
+
+- **Email Notifications** – Real-time alerts to users  
+- **Dark Web Scanning** – Monitors compromised credentials  
+- **Logging** – Tracks activity and system events
+
+---
+
+## 5. 🌐 Public API
+
+### Design
+- RESTful
+
+### Endpoints
+- `/api/auth` – JWT Authentication  
+- `/api/breaches` – Breach management  
+- `/api/alerts` – Alert access & control
+
+### Security
+- JWT-based access  
+- Role-aware permissions
+
+---
+
+## 6. 🖥️ Frontend App
+
+### Framework
+- Next.js + React
+
+### UI
+- Tailwind CSS
+
+### Features
+- Secure login  
+- Interactive dashboard  
+- Alerts & breach visibility  
+- Recommendations
+
+---
+
+## 7. 👥 Users
+
+### Roles
+- End Users – Monitor breaches, receive alerts  
+- Developers – Integrate via API  
+- Organizations – Centralized breach monitoring
