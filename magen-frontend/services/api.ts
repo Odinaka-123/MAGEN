@@ -1,6 +1,8 @@
 // API service for MAGEN application
 // This file provides functions to interact with the backend API
 
+import { toast } from "@/hooks/use-toast";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
 // MOCK DATA MODE (set to true to use mock data)
@@ -60,15 +62,41 @@ const mockChart = {
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   // Get the JWT token from localStorage
   const token = typeof window !== "undefined" ? localStorage.getItem("magen_token") : null;
-  console.log("Token used for API request:", token); // Debugging token retrieval
 
+  // Check token expiration before making the request
   if (token) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      console.log("Token expiration time (exp):", payload.exp);
-      console.log("Current time:", Math.floor(Date.now() / 1000));
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < now) {
+        // Token expired: clear and redirect
+        localStorage.removeItem("magen_token");
+        if (typeof window !== "undefined") {
+          toast({
+            title: "Session expired",
+            description: "Please log in again.",
+            variant: "destructive",
+          });
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 1000);
+        }
+        throw new Error("Session expired. Please log in again.");
+      }
     } catch (e) {
-      console.error("Failed to decode token payload:", e);
+      // If token is malformed, treat as expired
+      localStorage.removeItem("magen_token");
+      if (typeof window !== "undefined") {
+        toast({
+          title: "Invalid session",
+          description: "Please log in again.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1000);
+      }
+      throw new Error("Invalid session. Please log in again.");
     }
   }
 
@@ -85,6 +113,21 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     });
 
     if (!response.ok) {
+      // If unauthorized, force logout and redirect
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("magen_token");
+        if (typeof window !== "undefined") {
+          toast({
+            title: "Session expired",
+            description: "Please log in again.",
+            variant: "destructive",
+          });
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 1000);
+        }
+        throw new Error("Session expired. Please log in again.");
+      }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `API error: ${response.status}`);
     }

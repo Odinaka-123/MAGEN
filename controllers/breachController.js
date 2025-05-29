@@ -19,7 +19,7 @@ const scanBreaches = async (req, res) => {
     console.log("[scanBreaches] Breaches found:", breaches);
 
     // Save found breaches to the user's account if not already present
-    const userBreaches = await getBreachesByUser(req.user.userId);
+    const userBreaches = await getBreachesByUser(req.user.email);
     const userBreachSignatures = new Set(userBreaches.map(b => `${b.email || ''}|${b.breach_source || b.source || ''}|${b.breach_timestamp || b.date_detected || ''}`));
     const { createBreachFull } = require('../models/Breach');
 
@@ -27,7 +27,6 @@ const scanBreaches = async (req, res) => {
       const sig = `${breach.email || ''}|${breach.breach_source || breach.source || ''}|${breach.breach_timestamp || breach.date_detected || ''}`;
       if (!userBreachSignatures.has(sig)) {
         await createBreachFull({
-          user_id: req.user.userId,
           email: breach.email,
           phone: breach.phone,
           password: breach.password,
@@ -37,9 +36,16 @@ const scanBreaches = async (req, res) => {
           description: breach.description || `Imported from scan for ${email}`
         });
       }
+      // DEBUG: Log breach object for troubleshooting
+      console.log('ALERT DEBUG - breach object:', JSON.stringify(breach));
+      // DEBUG: Log source and date_detected extraction
+      const alertSource = breach.breach_source || breach.source || 'Unknown Source';
+      const alertDate = (breach.breach_timestamp ? new Date(breach.breach_timestamp).toISOString() : (breach.date_detected || 'Unknown Date'));
+      console.log('ALERT DEBUG - extracted source:', alertSource);
+      console.log('ALERT DEBUG - extracted date:', alertDate);
       await triggerAlert(req.user.userId, null, {
-        source: breach.breach_source || breach.source,
-        date_detected: breach.breach_timestamp || breach.date_detected
+        source: alertSource,
+        date_detected: alertDate
       });
     }
     res.status(200).json({ 
@@ -57,9 +63,9 @@ const scanBreaches = async (req, res) => {
 
 const getBreaches = async (req, res) => {
   try {
-    console.log("Fetching breaches for user ID:", req.user.userId);
-    const breaches = await getBreachesByUser(req.user.userId);
-    console.log("Database breaches:", breaches);
+    console.log("[getBreaches] User email:", req.user.email);
+    const breaches = await getBreachesByUser(req.user.email);
+    console.log("[getBreaches] Database breaches:", breaches);
 
     const formattedBreaches = breaches.map((breach) => ({
       ...breach,
@@ -71,12 +77,14 @@ const getBreaches = async (req, res) => {
       ],
     }));
 
-    const csvBreaches = getCsvBreachesForEmail(req.user.email);
-    console.log("CSV breaches:", csvBreaches);
+    const csvBreaches = await getCsvBreachesForEmail(req.user.email);
+    console.log("[getBreaches] CSV breaches for email", req.user.email, ":", csvBreaches);
+    console.log("[getBreaches] Final breaches to return:", [...formattedBreaches, ...csvBreaches]);
 
     res.status(200).json({ breaches: [...formattedBreaches, ...csvBreaches] });
   } catch (error) {
-    res.status(200).json({ breaches: [] });
+    console.error('[getBreaches] Error:', error);
+    res.status(500).json({ breaches: [], error: error.message });
   }
 };
 
@@ -93,4 +101,46 @@ const getBreachStats = async (req, res) => {
   }
 };
 
-module.exports = { getBreaches, scanBreaches, getBreachStats };
+// Get a single breach by ID (DB or CSV)
+const getBreachById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    console.log('[getBreachById] Requested id:', id);
+    // Try to find in DB
+    const db = require('../config/db');
+    const [rows] = await db.execute('SELECT * FROM breaches WHERE id = ?', [id]);
+    console.log('[getBreachById] DB query result:', rows);
+    if (rows && rows.length > 0) {
+      const breach = rows[0];
+      // Format like in getBreaches
+      breach.status = breach.breach_status || 'New';
+      breach.affectedData = [
+        'Email',
+        ...(breach.password ? ['Password'] : []),
+        ...(breach.phone ? ['Phone'] : []),
+      ];
+      return res.status(200).json(breach);
+    }
+    // Try to find in CSV (search ALL CSV breaches, not just for user)
+    const { getAllCsvBreaches } = require('../utils/breachedPasswords');
+    let allCsvBreaches = [];
+    if (typeof getAllCsvBreaches === 'function') {
+      allCsvBreaches = await getAllCsvBreaches();
+    } else {
+      // fallback: try getCsvBreachesForEmail for all emails (legacy)
+      const { getCsvBreachesForEmail } = require('../utils/breachedPasswords');
+      allCsvBreaches = await getCsvBreachesForEmail('*'); // '*' or similar to get all, if supported
+    }
+    console.log('[getBreachById] All CSV breach IDs:', allCsvBreaches.map(b => b.id));
+    const csvBreach = allCsvBreaches.find(b => String(b.id) === String(id));
+    if (csvBreach) {
+      return res.status(200).json(csvBreach);
+    }
+    return res.status(404).json({ message: 'Breach Not Found' });
+  } catch (error) {
+    console.error('[getBreachById] Error:', error);
+    return res.status(500).json({ message: 'Error fetching breach', error: error.message });
+  }
+};
+
+module.exports = { getBreaches, scanBreaches, getBreachStats, getBreachById };

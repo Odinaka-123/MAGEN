@@ -4,7 +4,8 @@ import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { BreachDetails } from "@/components/breach-details"
 
-export default function BreachDetailsPage({ params }: { params: { id: string } }) {
+export default async function BreachDetailsPage({ params }: { params: { id: string } }) {
+  const { id } = await params
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-2">
@@ -17,7 +18,7 @@ export default function BreachDetailsPage({ params }: { params: { id: string } }
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <BreachDetails id={params.id} />
+        <BreachDetails id={id} />
       </div>
     </div>
   )

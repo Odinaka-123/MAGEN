@@ -24,7 +24,7 @@ This guide will help you set up and run the MAGEN project, including both the ba
    ```
 3. **Configure environment variables:**
    - Create a `.env` file in the root directory (if not present).
-   - Add your MongoDB connection string and any other required environment variables.
+   - Add your MongoDB connection string and any other required environment variables (see below).
 4. **Start the backend server:**
    ```sh
    node server.js
@@ -93,8 +93,7 @@ This guide will help you set up and run the MAGEN project, including both the ba
 
 MAGEN is a full-stack web application designed to provide security breach detection, alerting, and user privacy recommendations. The project is split into two main parts:
 
-- **Backend:** Node.js with Express, connected to MongoDB, provi
-ding RESTful APIs for authentication, breach management, alerts, and user management.
+- **Backend:** Node.js with Express, connected to MongoDB, providing RESTful APIs for authentication, breach management, alerts, and user management.
 - **Frontend:** Next.js (React) application, styled with Tailwind CSS, providing a modern dashboard and user interface for interacting with the backend services.
 
 ---
@@ -141,7 +140,11 @@ magen-project/
 - **Database Integration:** MongoDB via Mongoose, with models for User, Breach, and Alert.
 - **API Routing:** Modular route definitions for `/api/auth`, `/api/breaches`, `/api/alerts`, `/api/users`.
 - **Middleware:** Authentication and validation middleware for route protection and input checking.
-- **Services:** Email notifications, breach detection logic, dark web scanning, and logging utilities.
+- **Services:**
+  - **Email notifications:** Sends alert emails to users using Nodemailer and Gmail (see `services/emailService.js`).
+  - **Breach detection logic:** Detects and processes breaches (see `services/breachDetectionService.js`).
+  - **Dark web scanning:** Monitors for compromised credentials (see `services/darkWebScanner.js`).
+  - **Logging utilities:** Tracks activity and system events (see `utils/logger.js`).
 
 #### Directory Details
 
@@ -196,7 +199,10 @@ magen-project/
 
 ## Environment Variables
 
-- **Backend:** `.env` file in the root directory for MongoDB connection string and other secrets.
+- **Backend:** `.env` file in the root directory for MongoDB connection string and other secrets. Required variables include:
+  - `MONGODB_URI` – MongoDB connection string
+  - `EMAIL_USER` – Gmail address for sending alert emails
+  - `EMAIL_PASS` – Gmail app password or OAuth2 token
 - **Frontend:** May require environment variables for API endpoints or third-party services.
 
 ---
@@ -246,7 +252,8 @@ magen-project/
 - MongoDB integration with Mongoose models for users, breaches, and alerts.
 - Authentication and authorization (JWT).
 - Breach detection and alerting logic.
-- Email and dark web scanning services.
+- Email alert service using Nodemailer and Gmail (see `services/emailService.js`).
+- Dark web scanning service.
 - Logging and utility helpers.
 
 ### Frontend
@@ -315,7 +322,7 @@ magen-project/
 
 ## 4. 🛠️ Services
 
-- **Email Notifications** – Real-time alerts to users  
+- **Email Notifications** – Real-time alerts to users (see `services/emailService.js`)
 - **Dark Web Scanning** – Monitors compromised credentials  
 - **Logging** – Tracks activity and system events
 
@@ -359,3 +366,14 @@ magen-project/
 - End Users – Monitor breaches, receive alerts  
 - Developers – Integrate via API  
 - Organizations – Centralized breach monitoring
+
+---
+
+## Recommendations
+
+- Regularly update dependencies for security.
+- Use environment variables for all secrets and sensitive config.
+- Review and test email alert functionality (see `services/emailService.js`).
+- Monitor logs for suspicious activity.
+
+---

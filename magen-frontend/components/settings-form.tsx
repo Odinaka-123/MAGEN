@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-import { getUserProfile } from "@/services/api"
+import { getUserProfile, updateUserProfile } from "@/services/api"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -20,6 +20,11 @@ const formSchema = z.object({
   emailAlerts: z.boolean(),
   inAppAlerts: z.boolean(),
   weeklyDigest: z.boolean(),
+  password: z.string().min(8, { message: "Password must be at least 8 characters" }).optional().or(z.literal("")),
+  confirmPassword: z.string().optional().or(z.literal("")),
+}).refine((data) => !data.password || data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 })
 
 export function SettingsForm() {
@@ -34,6 +39,8 @@ export function SettingsForm() {
       emailAlerts: true,
       inAppAlerts: true,
       weeklyDigest: false,
+      password: "",
+      confirmPassword: "",
     },
   })
 
@@ -62,10 +69,18 @@ export function SettingsForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
-
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const payload: any = {
+        name: values.name,
+        email: values.email,
+        emailAlerts: values.emailAlerts,
+        inAppAlerts: values.inAppAlerts,
+        weeklyDigest: values.weeklyDigest,
+      }
+      if (values.password) {
+        payload.password = values.password
+      }
+      await updateUserProfile(payload)
       toast({
         title: "Settings updated",
         description: "Your account settings have been updated successfully.",
@@ -105,6 +120,33 @@ export function SettingsForm() {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input placeholder="Enter your email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Enter new password" {...field} />
+              </FormControl>
+              <FormDescription>Leave blank to keep your current password.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm New Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Confirm new password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

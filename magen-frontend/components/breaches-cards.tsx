@@ -147,8 +147,8 @@ export const BreachesCards = forwardRef(function BreachesCards(_, ref) {
             <span>No breaches found for this filter.</span>
           </div>
         ) : (
-          filteredBreaches.map((breach) => (
-            <Card key={breach.id} className="overflow-hidden transition-all hover:shadow-md">
+          filteredBreaches.map((breach, idx) => (
+            <Card key={(typeof breach.id === 'string' ? breach.id : 'db-' + breach.id) + '-' + idx} className="overflow-hidden transition-all hover:shadow-md">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
@@ -175,8 +175,8 @@ export const BreachesCards = forwardRef(function BreachesCards(_, ref) {
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {Array.isArray(breach.affectedData) && breach.affectedData.length > 0
-                    ? breach.affectedData.map((data: string) => (
-                        <Badge key={data} variant="outline" className="text-xs">{data}</Badge>
+                    ? breach.affectedData.map((data: string, idx2: number) => (
+                        <Badge key={data + '-' + idx2} variant="outline" className="text-xs">{data}</Badge>
                       ))
                     : [
                         breach.email ? "Email" : undefined,
@@ -184,8 +184,8 @@ export const BreachesCards = forwardRef(function BreachesCards(_, ref) {
                         breach.password ? "Password" : undefined
                       ]
                         .filter((d): d is string => typeof d === "string")
-                        .map((data) => (
-                          <Badge key={data} variant="outline" className="text-xs">{data}</Badge>
+                        .map((data, idx2) => (
+                          <Badge key={data + '-' + idx2} variant="outline" className="text-xs">{data}</Badge>
                         ))}
                 </div>
               </CardContent>

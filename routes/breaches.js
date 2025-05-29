@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/auth');
-const { getBreaches, scanBreaches, getBreachStats } = require('../controllers/breachController');
+const { getBreaches, scanBreaches, getBreachStats, getBreachById } = require('../controllers/breachController');
 
 /**
  * @swagger
@@ -51,5 +51,30 @@ router.post('/scan', auth, scanBreaches);
  *         description: Unauthorized
  */
 router.get('/', auth, getBreaches);
+
+/**
+ * @swagger
+ * /api/breaches/{id}:
+ *   get:
+ *     summary: Get a single breach by ID
+ *     tags: [Breaches]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the breach
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Breach details
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Breach not found
+ */
+router.get('/:id', auth, getBreachById);
 
 module.exports = router;

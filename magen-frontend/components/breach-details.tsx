@@ -1,91 +1,33 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { AlertTriangle, CheckCircle, Clock, Shield } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-
-// Sample breach data - in a real app, this would come from an API
-const breachData = {
-  "1": {
-    id: "1",
-    date: "2023-10-15",
-    source: "Have I Been Pwned",
-    affectedData: ["Email", "Password"],
-    status: "New",
-    description:
-      "Your data was found in a breach of a major online service. The breach includes email addresses and passwords that were stored with weak encryption.",
-    recommendations: [
-      "Change your password immediately",
-      "Enable two-factor authentication",
-      "Don't reuse passwords across services",
-    ],
-  },
-  "2": {
-    id: "2",
-    date: "2023-09-22",
-    source: "Dark Web Monitor",
-    affectedData: ["Email", "Phone", "Address"],
-    status: "Active",
-    description:
-      "Your personal information was found being traded on dark web forums. This includes your email, phone number, and physical address.",
-    recommendations: [
-      "Monitor your accounts for suspicious activity",
-      "Consider placing a fraud alert on your credit reports",
-      "Be cautious of phishing attempts using your personal information",
-    ],
-  },
-  "3": {
-    id: "3",
-    date: "2023-08-05",
-    source: "Have I Been Pwned",
-    affectedData: ["Email"],
-    status: "Resolved",
-    description:
-      "Your email address was found in a marketing database that was exposed. No passwords or sensitive information were included in this breach.",
-    recommendations: [
-      "Be aware of potential increase in spam emails",
-      "Consider using email aliases for different services",
-    ],
-  },
-  "4": {
-    id: "4",
-    date: "2023-07-18",
-    source: "Security Alert",
-    affectedData: ["Password", "Username"],
-    status: "Resolved",
-    description:
-      "Your username and password were found in a breach of an online forum. The passwords were stored in plain text.",
-    recommendations: [
-      "Change your password on all sites where you used this password",
-      "Use a password manager to generate unique passwords",
-    ],
-  },
-  "5": {
-    id: "5",
-    date: "2023-06-30",
-    source: "Dark Web Monitor",
-    affectedData: ["Credit Card"],
-    status: "Active",
-    description:
-      "Your credit card information was found in a breach of an e-commerce website. This includes the full card number, expiration date, and CVV.",
-    recommendations: [
-      "Contact your bank to cancel the card and request a new one",
-      "Monitor your statements for unauthorized charges",
-      "Consider setting up transaction alerts",
-    ],
-  },
-}
+import { getBreachById } from "@/services/api"
 
 export function BreachDetails({ id }: { id: string }) {
   const { toast } = useToast()
-  const [status, setStatus] = useState(breachData[id as keyof typeof breachData]?.status || "Unknown")
-  const breach = breachData[id as keyof typeof breachData]
+  const [breach, setBreach] = useState<any>(null)
+  const [status, setStatus] = useState<string>("Unknown")
+  const [loading, setLoading] = useState(true)
 
+  useEffect(() => {
+    setLoading(true)
+    setBreach(null)
+    getBreachById(id)
+      .then((data) => {
+        setBreach(data)
+        setStatus(data?.status || data?.breach_status || "Unknown")
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [id])
+
+  if (loading) return <div>Loading...</div>
   if (!breach) {
     return (
       <Card>
@@ -147,17 +89,17 @@ export function BreachDetails({ id }: { id: string }) {
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Date Detected</h3>
-              <p className="text-base">{breach.date}</p>
+              <p className="text-base">{breach.date || breach.breach_timestamp || "Unknown"}</p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Source</h3>
-              <p className="text-base">{breach.source}</p>
+              <p className="text-base">{breach.source || breach.breach_source || "Unknown"}</p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Affected Data</h3>
               <div className="flex flex-wrap gap-1 mt-1">
-                {breach.affectedData.map((data) => (
-                  <Badge key={data} variant="outline">
+                {(breach.affectedData || []).map((data: string, idx: number) => (
+                  <Badge key={data + "-" + idx} variant="outline">
                     {data}
                   </Badge>
                 ))}
@@ -173,17 +115,19 @@ export function BreachDetails({ id }: { id: string }) {
 
         <Separator />
 
-        <div>
-          <h3 className="text-base font-medium mb-3">Recommendations</h3>
-          <ul className="space-y-2">
-            {breach.recommendations.map((rec, index) => (
-              <li key={index} className="flex items-start gap-2">
-                <Shield className="h-5 w-5 text-blue-500 mt-0.5 shrink-0" />
-                <span className="text-sm">{rec}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {breach.recommendations && breach.recommendations.length > 0 && (
+          <div>
+            <h3 className="text-base font-medium mb-3">Recommendations</h3>
+            <ul className="space-y-2">
+              {breach.recommendations.map((rec: string, index: number) => (
+                <li key={index} className="flex items-start gap-2">
+                  <Shield className="h-5 w-5 text-blue-500 mt-0.5 shrink-0" />
+                  <span className="text-sm">{rec}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline">View Similar Breaches</Button>

@@ -25,10 +25,6 @@ export default function DashboardPage() {
           <BreachesCards ref={breachesRef} />
         </div>
         <div className="space-y-6">
-          <Card className="p-4">
-            <h3 className="text-lg font-medium mb-4">Breach History</h3>
-            <BreachesChart />
-          </Card>
           <RecentAlerts />
         </div>
       </div>

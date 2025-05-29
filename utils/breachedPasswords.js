@@ -45,9 +45,10 @@ function getCsvBreachesForEmail(email) {
       id: `csv-${row.id || idx}`,
       source: row.breach_source || 'CSV Breach',
       date: row.breach_timestamp || '',
-      description: `Breached info found in CSV: ${row.breach_source || 'Unknown source'}`,
+      description: row.description || `Breached info found in CSV: ${row.breach_source || 'Unknown source'}`,
       status: 'New',
       affectedData: ['Email', ...(row.password ? ['Password'] : []), ...(row.phone ? ['Phone'] : [])],
+      ...row
     }));
 }
 

@@ -2,29 +2,28 @@
 const pool = require('../config/db');
 
 // Create a new breach
-async function createBreach(userId, source, dateDetected, description) {
+async function createBreach(email, source, dateDetected, description) {
   const [result] = await pool.execute(
-    'INSERT INTO breaches (user_id, source, date_detected, description) VALUES (?, ?, ?, ?)',
-    [userId, source, dateDetected, description]
+    'INSERT INTO breaches (email, breach_source, breach_timestamp, description) VALUES (?, ?, ?, ?)',
+    [email, source, dateDetected, description]
   );
   return result.insertId;
 }
 
-// Get breaches by user
-async function getBreachesByUser(userId) {
-  console.log("Executing query: SELECT * FROM breaches WHERE user_id = ?");
-  console.log("With parameters:", [userId]);
+// Get breaches by user (by email)
+async function getBreachesByUser(email) {
+  console.log("Executing query: SELECT * FROM breaches WHERE email = ?");
+  console.log("With parameters:", [email]);
 
-  const [rows] = await pool.execute('SELECT * FROM breaches WHERE user_id = ? ORDER BY breach_timestamp DESC', [userId]);
+  const [rows] = await pool.execute('SELECT * FROM breaches WHERE email = ? ORDER BY breach_timestamp DESC', [email]);
   return rows;
 }
 
 // Create a new breach with all relevant fields
 async function createBreachFull(breach) {
   const [result] = await pool.execute(
-    'INSERT INTO breaches (user_id, email, phone, password, breach_status, breach_source, breach_timestamp, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO breaches (email, phone, password, breach_status, breach_source, breach_timestamp, description) VALUES (?, ?, ?, ?, ?, ?, ?)',
     [
-      breach.user_id,
       breach.email,
       breach.phone,
       breach.password,

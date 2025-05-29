@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { query } from "@/services/database"
+// @ts-ignore
+import bcrypt from "bcrypt"
 
 export async function GET() {
   try {
@@ -47,8 +49,8 @@ export async function PUT(request: Request) {
     const userId = Number.parseInt(session.user.id as string)
     const data = await request.json()
 
-    // Update user profile
-    if (data.name || data.email) {
+    // Update user profile (including password)
+    if (data.name || data.email || data.password) {
       const updates = []
       const params = []
 
@@ -60,6 +62,12 @@ export async function PUT(request: Request) {
       if (data.email) {
         updates.push("email = ?")
         params.push(data.email)
+      }
+
+      if (data.password) {
+        const passwordHash = await bcrypt.hash(data.password, 10)
+        updates.push("password_hash = ?")
+        params.push(passwordHash)
       }
 
       params.push(userId)

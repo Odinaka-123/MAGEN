@@ -2,14 +2,15 @@ import { SettingsForm } from "@/components/settings-form"
 
 export default function SettingsPage() {
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">Manage your account settings and preferences</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 max-w-2xl">
-        <SettingsForm />
+    <div className="flex justify-center bg-background">
+      <div className="flex flex-col justify-center items-center w-full max-w-2xl p-6 space-y-8 mx-auto min-h-screen">
+        <div className="w-full">
+          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+          <p className="text-muted-foreground">Manage your account settings and preferences</p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 w-full">
+          <SettingsForm />
+        </div>
       </div>
     </div>
   )

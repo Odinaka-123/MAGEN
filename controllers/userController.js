@@ -1,4 +1,4 @@
-const { findUserById, updateUserById } = require('../models/User');
+const { findUserById, updateUserById, updateUserByIdWithPassword } = require('../models/User');
 const db = require('../config/db');
 
 // Get current user's profile
@@ -20,8 +20,13 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { name, email } = req.body;
-    const affectedRows = await updateUserById(userId, name, email);
+    const { name, email, password } = req.body;
+    let affectedRows;
+    if (password) {
+      affectedRows = await updateUserByIdWithPassword(userId, name, email, password);
+    } else {
+      affectedRows = await updateUserById(userId, name, email);
+    }
     if (affectedRows === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
