@@ -54,7 +54,7 @@ This guide will help you set up and run the MAGEN project, including both the ba
    # or
    pnpm dev
    ```
-   - The frontend should now be running at http://localhost:3000 (or as configured in `next.config.mjs`).
+   - The frontend should now be running at http://localhost:3001 (or as configured in `next.config.mjs`).
 
 ---
 
@@ -190,7 +190,7 @@ magen-project/
 
 #### Frontend Scripts
 
-- `npm run dev`: Starts the frontend development server (http://localhost:3000).
+- `npm run dev`: Starts the frontend development server (http://localhost:3001).
 - `pnpm dev`: Alternative using pnpm (recommended).
 - `npm install --legacy-peer-deps`: Installs dependencies, resolving peer issues.
 - `pnpm install`: Installs dependencies using pnpm.
@@ -311,7 +311,7 @@ magen-project/
 ## 3. 🗄️ Database
 
 ### Type
-- MongoDB
+- Mysql
 
 ### Stores
 - Users  
