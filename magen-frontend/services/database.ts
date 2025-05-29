@@ -1,3 +1,13 @@
+// All database logic has been moved to the Express backend.
+// Use fetch or axios to call your backend API endpoints from the frontend.
+
+// Example:
+// export async function getUserByEmail(email: string) {
+//   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/email/${email}`);
+//   return res.json();
+// }
+// ...repeat for other functions as needed...
+
 // Database configuration for MAGEN application
 // This file provides functions to connect to a MySQL database
 

@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const breachRoutes = require('./routes/breaches');
 const alertRoutes = require('./routes/alerts');
 const userRoutes = require('./routes/users');
+const nextAuthRoutes = require('./routes/nextAuth');
 const { loadBreachedPasswords, isBreachedPassword } = require('./utils/breachedPasswords');
 
 const app = express();
@@ -54,6 +55,7 @@ loadBreachedPasswords('./fake_breach_data_v3.csv').then(() => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', nextAuthRoutes);
 app.use('/api/breaches', breachRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/users', userRoutes);
